@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actividad 1 - UMCE-SENADIS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* PALETA: Azul Noche y Oro */
+            --primary-dark: #020617; /* Very dark slate */
+            --primary-main: #0f172a; /* Slate 900 */
+            --secondary-blue: #1e3a8a; /* Blue 900 */
+            --accent-gold: #d97706; /* Amber 600 */
+            --light-gold: #fef3c7; /* Amber 50 */
+            --light-bg: #f8fafc;
+            --text-dark: #0f172a;
+            --white: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            margin: 0; padding: 20px; min-height: 100vh;
+        }
+
+        .app-container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+        /* HEADER */
+        .header-nav {
+            background: var(--white); border-bottom: 6px solid var(--accent-gold);
+            padding: 1.5rem; text-align: center; border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .header-nav h1 { margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--primary-main); }
+        .header-nav p { margin: 8px 0 0 0; font-size: 1rem; font-weight: 800; color: var(--secondary-blue); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* PANTALLAS SIMPLES (Intro/Cierre) CON GRADIENTE DINÁMICO AZUL NOCHE */
+        @keyframes gradientNight { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        .screen-simple {
+            background: linear-gradient(-45deg, #020617, #0f172a, #1e3a8a, #020617);
+            background-size: 400% 400%; animation: gradientNight 15s ease infinite;
+            color: var(--white); border-radius: 25px; padding: 3rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); display: none; max-width: 850px; margin: 0 auto;
+        }
+        .screen-simple.active { display: block; animation: fadeIn 0.5s ease-out, gradientNight 15s ease infinite; }
+        .screen-simple h2 { color: var(--accent-gold); font-size: 2.2rem; margin-top: 0; }
+        .screen-simple p { font-size: 1.15rem; line-height: 1.6; margin-bottom: 1.5rem; color: #f1f5f9; }
+
+        .text-box-modern { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 15px; padding: 1.5rem; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1.5rem; }
+        .text-box-modern p { margin-bottom: 1rem; } .text-box-modern p:last-child { margin-bottom: 0; }
+
+        /* GRID DEL CASO */
+        .screen-case { display: none; }
+        .screen-case.active { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* SIDEBAR (Barra Izquierda) */
+        .sidebar { background: var(--primary-main); color: white; border-radius: 25px; padding: 2rem 1.5rem; position: sticky; top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .sidebar-header { border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+        .sidebar-header h2 { font-size: 1.5rem; color: var(--accent-gold); margin: 0 0 10px 0; }
+        .sidebar-header p { font-size: 1rem; color: #cbd5e1; margin: 0; font-weight: 500; }
+        
+        .sidebar-card { background: white; color: var(--text-dark); border-radius: 15px; padding: 1.2rem; margin-bottom: 1rem; border-left: 5px solid var(--secondary-blue); }
+        .sidebar-card h3 { color: var(--secondary-blue); margin: 0 0 8px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+        .sidebar-card p { font-size: 0.95rem; line-height: 1.5; margin: 0; }
+
+        /* CONTENIDO PRINCIPAL */
+        .case-content { background: var(--white); border-radius: 25px; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        
+        .case-header { display: flex; align-items: center; gap: 15px; margin-bottom: 1.5rem; }
+        .badge { background: var(--secondary-blue); color: white; padding: 6px 15px; border-radius: 8px; font-weight: 800; font-size: 1rem; letter-spacing: 1px; flex-shrink: 0; white-space: nowrap; display: inline-block; }
+        .case-desc { font-size: 1.15rem; font-weight: 600; color: var(--text-dark); line-height: 1.5; margin: 0; }
+
+        /* IMAGEN CON LOADER */
+        .case-img-container { width: 100%; height: 300px; background: #e2e8f0; border-radius: 15px; margin-bottom: 2rem; position: relative; overflow: hidden; border: 2px solid var(--border-color); }
+        .case-img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease-in-out; }
+        .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 4px solid #cbd5e1; border-top: 4px solid var(--secondary-blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        /* DOS COLUMNAS DE ETAPAS */
+        .etapas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .etapa-box { background: #f8fafc; border: 2px solid var(--border-color); border-radius: 15px; padding: 1.5rem; display: flex; flex-direction: column; }
+        
+        .etapa-title { font-size: 1.15rem; font-weight: 800; color: var(--secondary-blue); margin-top: 0; display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+        .etapa-title span { background: var(--secondary-blue); color: white; width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 1rem; flex-shrink: 0; }
+        
+        .instruction-text { font-size: 0.95rem; color: #475569; margin-bottom: 1.5rem; font-weight: 500; }
+
+        /* RADIO BUTTONS (Etapa 1) */
+        .radio-option { display: flex; align-items: center; gap: 12px; background: white; border: 2px solid var(--border-color); padding: 12px 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .radio-option:hover { border-color: #94a3b8; }
+        .radio-option.selected { border-color: var(--secondary-blue); background: #eff6ff; }
+        .radio-circle { width: 20px; height: 20px; border: 2px solid #94a3b8; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: 0.2s; }
+        .radio-option.selected .radio-circle { border-color: var(--secondary-blue); }
+        .radio-circle::after { content: ''; width: 10px; height: 10px; background: var(--secondary-blue); border-radius: 50%; display: none; }
+        .radio-option.selected .radio-circle::after { display: block; }
+        .radio-text { font-size: 1rem; font-weight: 600; color: var(--text-dark); }
+        .radio-option.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* RETROALIMENTACION ETAPA 1 */
+        .retro-box { background: var(--light-gold); border-left: 6px solid var(--accent-gold); padding: 1.5rem; border-radius: 10px; margin-top: 1.5rem; display: none; animation: fadeIn 0.5s; font-size: 1rem; line-height: 1.5; color: #78350f; }
+
+        /* ACORDEON (Etapa 2) */
+        .accordion-item { background: white; border: 2px solid var(--border-color); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+        .accordion-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 700; color: var(--secondary-blue); transition: background 0.2s; }
+        .accordion-header:hover { background: #f1f5f9; }
+        .accordion-header.active { background: #eff6ff; border-bottom: 2px solid var(--border-color); }
+        .accordion-content { padding: 15px; font-size: 0.95rem; line-height: 1.5; color: var(--text-dark); display: none; background: #fafaf9; }
+        .chevron { transition: transform 0.3s; font-size: 1.2rem; }
+        .accordion-header.active .chevron { transform: rotate(180deg); }
+
+        /* BOTONES */
+        .btn { background: linear-gradient(135deg, var(--secondary-blue), var(--primary-main)); color: white; border: none; padding: 1rem 2.5rem; border-radius: 40px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.3); display: block; margin: 1.5rem auto 0; }
+        .btn:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; transform: none; color: #64748b; }
+        .btn:not(:disabled):hover { transform: translateY(-2px); filter: brightness(1.2); }
+        .btn-gold { background: linear-gradient(135deg, var(--accent-gold), #f59e0b); box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3); color: #fff; }
+
+        .info-alert { background: #f1f5f9; padding: 1rem; border-radius: 10px; text-align: center; font-size: 0.9rem; color: #475569; margin-top: 1rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+        @media (max-width: 900px) {
+            .screen-case.active { grid-template-columns: 1fr; }
+            .sidebar { position: relative; top: 0; margin-bottom: 20px; }
+            .etapas-grid { grid-template-columns: 1fr; }
+            .screen-simple { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="app">
+    
+    <header class="header-nav">
+        <h1>ACTIVIDAD 2</h1>
+        <p>UMCE-SENADIS</p>
+    </header>
+
+    <div id="screen-0" class="screen-simple active">
+        <h2>¿Qué estoy viendo realmente?</h2>
+        <h3 style="color: var(--accent-gold); font-size: 1.4rem; margin-bottom: 1.5rem;">Reconociendo mis interpretaciones en contextos de diversidad</h3>
+        
+        <div class="text-box-modern">
+            <h4 style="color: #cbd5e1; margin-top:0; font-size: 1.2rem;">¿Qué idea exploraremos?</h4>
+            <p>Las lecturas revisadas muestran que nuestras respuestas frente a una situación no dependen únicamente de aquello que observamos. Las emociones, las experiencias previas, las creencias y las expectativas influyen constantemente en la manera en que interpretamos lo que ocurre a nuestro alrededor y en las decisiones que tomamos en la práctica educativa.</p>
+            <p>En este proceso, las habilidades socioemocionales desempeñan un papel fundamental. Habilidades como el autoconocimiento, la empatía, la autorregulación y la comunicación efectiva nos permiten reconocer cómo nuestras propias emociones y formas de pensar influyen en la comprensión que construimos sobre las personas y las situaciones. Sin esta reflexión, corremos el riesgo de interpretar rápidamente determinadas conductas desde nuestros supuestos, atribuyendo significados que no necesariamente reflejan lo que la otra persona está experimentando.</p>
+            <p>Cuando trabajamos con estudiantes en situación de discapacidad, con déficit atencional, autismo u otras experiencias asociadas a la neurodiversidad, esta capacidad reflexiva adquiere especial relevancia. Con frecuencia creemos estar observando una conducta de manera objetiva; sin embargo, nuestras interpretaciones también están mediadas por nuestras experiencias, conocimientos, expectativas y disposiciones emocionales. Lo que entendemos como interés, esfuerzo, participación, desafío o dificultad puede adquirir significados distintos según la perspectiva desde la cual observamos.</p>
+            <p>Desarrollar habilidades socioemocionales implica, entre otras cosas, aprender a cuestionar nuestras primeras interpretaciones, considerar distintos puntos de vista y buscar comprender las situaciones antes de emitir juicios o tomar decisiones. Esto favorece una mirada más amplia y reflexiva sobre la diversidad, permitiendo reconocer que las experiencias educativas se construyen en la interacción entre las personas y los contextos en los que participan.</p>
+        </div>
+
+        <p style="font-weight: 700; color: #ffffff; font-size: 1.25rem; text-align: center;">Esta actividad te invita a detenerte en algunas experiencias cotidianas y preguntarte:<br><span style="color: var(--accent-gold);">¿Qué habilidad socioemocional podría ayudarme a comprender esta situación desde una perspectiva más amplia?</span></p>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="btn btn-gold" onclick="startActivity()">Comenzar Actividad 🚀</button>
+        </div>
+    </div>
+
+    <div id="screen-case" class="screen-case">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>ACTIVIDAD 1</h2>
+                <p>¿Qué estoy viendo realmente?</p>
+            </div>
+            
+            <div class="sidebar-card">
+                <h3>🎯 Tu misión</h3>
+                <p>Lee cada situación. Luego responde:</p>
+                <ul style="padding-left: 15px; margin-top: 10px; font-size: 0.9rem;">
+                    <li><strong>Etapa 1:</strong> ¿Qué explicación aparece primero en tu mente? Selecciona la alternativa que más se acerque a tu reacción inicial.</li>
+                    <li style="margin-top: 8px;"><strong>Etapa 2:</strong> Después de leer la retroalimentación, identifica qué habilidad socioemocional podría ayudarte a ampliar tu comprensión de la situación.</li>
+                </ul>
+            </div>
+
+            <div class="sidebar-card" style="border-left-color: var(--accent-gold);">
+                <h3 style="color: var(--accent-gold);">💡 Recuerda</h3>
+                <p>No se trata de encontrar la respuesta correcta, sino de reconocer cómo interpretamos las situaciones y cómo podemos ampliar nuestra mirada antes de emitir juicios.</p>
+            </div>
+        </aside>
+
+        <main class="case-content">
+            <div class="case-header">
+                <span class="badge" id="case-badge">Situación 1</span>
+                <p class="case-desc" id="case-text"></p>
+            </div>
+
+            <div class="case-img-container">
+                <div class="loader" id="image-loader"></div>
+                <img id="case-image" class="case-img" src="" alt="Ilustración del caso">
+            </div>
+
+            <div class="etapas-grid">
+                <div class="etapa-box" id="etapa1-container">
+                    <h3 class="etapa-title"><span>1</span> Etapa 1: ¿Cuál es la primera interpretación que aparece en tu mente?</h3>
+                    <p class="instruction-text">Selecciona la alternativa que más se acerque a tu reacción inicial.</p>
+                    
+                    <div id="options-1"></div>
+                    
+                    <button class="btn" id="btn-continuar" disabled onclick="submitEtapa1()">Continuar</button>
+                    <div class="info-alert" id="info-alert-1">ℹ️ Selecciona una alternativa y luego presiona "Continuar" para ver la retroalimentación.</div>
+                    
+                    <div id="retro-box" class="retro-box"></div>
+                </div>
+
+                <div class="etapa-box" id="etapa2-container" style="opacity: 0; pointer-events: none; filter: blur(4px); transition: 0.5s;">
+                    <h3 class="etapa-title"><span>2</span> Etapa 2: ¿Qué habilidad socioemocional podría ayudarte a ampliar tu comprensión?</h3>
+                    <p class="instruction-text">Selecciona una habilidad para ver cómo puede ayudarte a comprender mejor esta situación.</p>
+                    
+                    <div id="options-2"></div>
+                    <div class="info-alert">ℹ️ Haz clic en las habilidades para desplegar su respuesta automática.</div>
+
+                    <button class="btn btn-gold" id="btn-next-case" style="display:none; margin-top:20px;" onclick="nextCase()">Siguiente Situación ➡️</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="screen-closure" class="screen-simple">
+        <h2 style="color: var(--accent-gold);">CIERRE FINAL</h2>
+        <div class="text-box-modern">
+            <p>Las lecturas revisadas muestran que la inclusión educativa no depende únicamente de recursos, normativas o estrategias pedagógicas. También se construye en las decisiones cotidianas que tomamos, en la manera en que interpretamos las situaciones que ocurren en el aula y en cómo nos relacionamos con la diversidad presente en nuestras comunidades educativas.</p>
+            <p>Las habilidades socioemocionales forman parte de este proceso. Nos ayudan a reconocer nuestras propias creencias y expectativas, comprender distintas perspectivas, enfrentar situaciones complejas y construir respuestas que favorezcan la participación de todas las personas.</p>
+            <p>Por ello, el objetivo de esta actividad no es identificar respuestas correctas, sino promover una reflexión sobre cómo nuestras formas de pensar, sentir y actuar pueden influir en las oportunidades de aprendizaje y participación que generamos para estudiantes con trayectorias, características y experiencias diversas.</p>
+            <p>La diversidad forma parte de toda comunidad educativa. Sin embargo, la manera en que la comprendemos y respondemos a ella puede ampliar o limitar las oportunidades de participación de nuestros estudiantes.</p>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.9); padding: 2rem; border-radius: 20px; text-align: center; margin-top: 2rem;">
+            <p style="font-size: 1.2rem; font-weight: 800; margin-top: 0; margin-bottom: 15px; color: #020617;">¿Qué habilidad socioemocional reconoces con mayor facilidad en tu práctica docente cuando te enfrentas a la diversidad?</p>
+            <p style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0; color: #020617;">¿Cuál de ellas te gustaría seguir fortaleciendo para favorecer contextos educativos más inclusivos?</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <button class="btn btn-gold" onclick="finishActivity()">Finalizar Actividad ✨</button>
+        </div>
+    </div>
+
+    <div id="screen-end" class="screen-simple" style="text-align: center;">
+        <span style="font-size: 5rem; display: block; margin-bottom: 1rem;">🎉</span>
+        <h2 style="font-size: 2.8rem; margin-bottom: 10px; color: var(--accent-gold);">¡Actividad Completada!</h2>
+        <p style="font-size: 1.25rem; font-weight: 600; color: white;">Has reflexionado exitosamente sobre tus interpretaciones.</p>
+        
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 3rem;">
+            <button class="btn" style="margin:0; background: transparent; border: 2px solid white;" onclick="location.reload()">Volver a empezar 🔄</button>
+            <button class="btn btn-gold" style="margin:0;" onclick="exitGenially()">Salir de la actividad 👋</button>
+        </div>
+        <p style="margin-top: 2rem; font-weight: 800; color: #94a3b8; font-size: 0.9rem;">UMCE-SENADIS 2026</p>
+    </div>
+
+</div>
+
+<script>
+    // 🔊 Audios restaurados
+    const soundClick = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+    const soundSuccess = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3');
+
+    const casesData = [
+        {
+            title: "Situación 1",
+            text: "Durante una actividad grupal, un estudiante con déficit atencional se levanta varias veces de su puesto, interrumpe a sus compañeros y parece cambiar constantemente de foco de atención.",
+            img: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800",
+            etapa1_opts: ["No está interesado en la actividad.", "Tiene dificultades para respetar normas de convivencia.", "Podría estar necesitando apoyos diferentes para participar."],
+            retro: "Las conductas observables no siempre permiten comprender por sí solas lo que una persona está experimentando.<br><br>Con frecuencia interpretamos determinadas acciones a partir de nuestras expectativas sobre cómo debería comportarse un estudiante durante una actividad de aprendizaje. Sin embargo, una misma conducta puede tener explicaciones diversas y estar influida por múltiples factores que no siempre son visibles de manera inmediata.<br><br>En este caso, aspectos asociados al déficit atencional, como las dificultades en la regulación de la atención, la impulsividad o la necesidad de movimiento, podrían estar influyendo en la manera en que el estudiante participa en la actividad. No obstante, comprender una situación implica ir más allá de una explicación rápida y preguntarnos qué otros antecedentes necesitamos considerar antes de llegar a una conclusión.",
+            habilidades: [
+                { title: "Autoconocimiento", desc: "<strong>RESPUESTA:</strong> Esta habilidad te permite reconocer cómo tus propias creencias, experiencias, emociones y expectativas pueden influir en la interpretación que realizas de la conducta del estudiante. Lo que se relaciona con cuestionar si tu primera explicación surge de la situación observada o de la manera en que esperas que un estudiante se comporte durante una actividad grupal." },
+                { title: "Autorregulación", desc: "<strong>RESPUESTA</strong> Esta habilidad te permite detenerte antes de reaccionar o emitir un juicio inmediato sobre la conducta observada. Lo que se relaciona con darte el tiempo para analizar la situación con mayor profundidad, evitando responder únicamente desde la frustración, la preocupación o la necesidad de corregir la conducta de forma inmediata." },
+                { title: "Empatía", desc: "<strong>RESPUESTA:</strong> Esta habilidad te permite intentar comprender la situación desde la experiencia del estudiante, considerando sus necesidades, desafíos y formas particulares de interactuar con el entorno. Lo que se relaciona con preguntarte qué podría estar experimentando el estudiante y qué factores podrían estar influyendo en su participación durante la actividad." },
+                { title: "Resolución de conflictos", desc: "<strong>RESPUESTA:</strong> Esta habilidad te permite identificar alternativas de acción que favorezcan la participación y el bienestar de todos los involucrados. Lo que se relaciona con buscar estrategias, apoyos o ajustes que permitan abordar las dificultades observadas de manera constructiva, promoviendo una mejor convivencia y participación en el grupo." }
+            ]
+        },
+        {
+            title: "Situación 2",
+            text: "Durante una exposición oral, una estudiante autista evita mirar a quienes la escuchan. Mantiene la vista fija en sus apuntes y utiliza un tono de voz monótono durante gran parte de su presentación.",
+            img: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=800",
+            etapa1_opts: ["No preparó suficientemente la actividad.", "Se encuentra poco comprometida con la presentación.", "Podría estar utilizando una forma diferente de comunicación."],
+            retro: "Las formas de comunicación no son iguales para todas las personas. En una exposición oral, solemos asociar el contacto visual, la expresividad facial o las variaciones en el tono de voz con indicadores de interés, seguridad o preparación. Sin embargo, estas expectativas responden a determinadas normas sociales y comunicativas que no necesariamente son compartidas por todas las personas.<br><br>En el caso de algunos estudiantes autistas, evitar el contacto visual, mantener la atención en apoyos visuales o utilizar una entonación diferente no implica necesariamente desinterés, inseguridad o falta de preparación. Estas características pueden formar parte de su manera habitual de comunicarse y participar en una actividad.<br><br>La situación invita a preguntarnos si estamos evaluando el contenido de la presentación o la forma en que esperamos que una persona se comunique durante ella.",
+            habilidades: [
+                { title: "Autoconocimiento", desc: "<strong>RESPUESTA:</strong> Esta habilidad te permite reconocer cómo tus propias creencias, experiencias y expectativas influyen en la forma en que interpretas la presentación de la estudiante. Lo que se relaciona con reflexionar sobre las ideas que tienes acerca de cómo una persona debería expresarse durante una exposición oral para ser considerada interesada, preparada o comprometida." },
+                { title: "Autorregulación", desc: "<strong>RESPUESTA:</strong> Esta habilidad te permite detenerte antes de emitir un juicio inmediato sobre la actitud o el desempeño de la estudiante. Lo que se relaciona con evitar concluir rápidamente que existe falta de interés o preparación, dándote la oportunidad de analizar la situación desde una perspectiva más amplia." },
+                { title: "Empatía", desc: "<strong>RESPUESTA AUTOMÁTICA:</strong> Esta habilidad te permite intentar comprender la situación desde la experiencia de la estudiante, considerando que existen diversas formas de comunicarse y participar. Lo que se relaciona con reconocer que el contacto visual, la expresión facial o la entonación no tienen el mismo significado para todas las personas." },
+                { title: "Resolución de conflictos", desc: "<strong>RESPUESTA:</strong> Esta habilidad te permite identificar formas constructivas de responder ante posibles malentendidos o dificultades de comunicación. Lo que se relaciona con buscar estrategias que permitan valorar los aprendizajes de la estudiante sin centrar la atención exclusivamente en la forma en que realiza su exposición." }
+            ]
+        },
+        {
+            title: "Situación 3",
+            text: "Durante una evaluación escrita, un estudiante con discapacidad intelectual leve, solicita reiteradamente aclaraciones sobre las instrucciones. Aunque la explicación ya fue entregada al curso, parece inseguro respecto de lo que debe hacer y demora más tiempo que sus compañeros en iniciar la actividad.",
+            img: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=800",
+            etapa1_opts: ["No puso atención cuando se explicaron las instrucciones.", "Depende demasiado del apoyo del docente.", "Podría estar necesitando mayor claridad o apoyos para comprender la tarea."],
+            retro: "Cuando un estudiante solicita aclaraciones de manera reiterada, es fácil interpretar la situación desde nuestras expectativas sobre cómo debería desarrollarse una evaluación. Sin embargo, las personas no acceden ni procesan la información de la misma manera.<br><br>En el caso de estudiantes con Discapacidad Intelectual Leve, algunas instrucciones pueden requerir mayor explicitación, ejemplos adicionales o más oportunidades para verificar la comprensión antes de iniciar una tarea. Esto no implica necesariamente falta de atención o dependencia, sino que puede reflejar una necesidad de apoyos ajustados a las características de la situación.<br><br>Antes de emitir un juicio, resulta útil preguntarse qué información tenemos realmente sobre lo que está ocurriendo y qué elementos del contexto podrían estar influyendo en la experiencia del estudiante.",
+            habilidades: [
+                { title: "Autoconocimiento", desc: "<strong>RESPUESTA:</strong> El autoconocimiento invita a revisar las creencias y expectativas que pueden influir en la manera en que interpretamos esta situación. Por ejemplo, podríamos preguntarnos qué entendemos por autonomía, cuánto esperamos que los estudiantes comprendan una instrucción a la primera explicación o cómo interpretamos las solicitudes de ayuda dentro de una evaluación." },
+                { title: "Autorregulación", desc: "<strong>RESPUESTA:</strong> La autorregulación puede ayudarnos a evitar conclusiones inmediatas frente a situaciones que generan incertidumbre o frustración. Antes de asumir que el estudiante no prestó atención o que depende excesivamente del apoyo docente, esta habilidad permite detenerse, observar la situación con mayor calma y considerar otras explicaciones posibles." },
+                { title: "Empatía", desc: "<strong>RESPUESTA:</strong> La empatía nos invita a intentar comprender la experiencia del estudiante desde su propia perspectiva. Solicitar aclaraciones de manera reiterada no necesariamente refleja falta de atención o esfuerzo. También puede indicar inseguridad, necesidad de mayor claridad o dificultades para comprender las instrucciones en el formato en que fueron presentadas." },
+                { title: "Resolución de conflictos", desc: "<strong>RESPUESTA:</strong> La resolución de conflictos puede contribuir a identificar formas constructivas de responder cuando surge una dificultad durante la evaluación. En lugar de centrar la atención únicamente en el problema, esta habilidad permite pensar en estrategias que favorezcan la comprensión de la tarea y la participación del estudiante en condiciones más equitativas." }
+            ]
+        },
+        {
+            title: "Situación 4",
+            text: "En una conversación informal, un colega señala que las adecuaciones realizadas para algunos estudiantes generan ventajas injustas respecto del resto del curso.",
+            img: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=800",
+            etapa1_opts: ["Está en contra de la inclusión educativa.", "No comprende el propósito de las adecuaciones.", "Podría existir una preocupación legítima respecto a la equidad que requiere ser dialogada."],
+            retro: "Las conversaciones sobre adecuaciones, inclusión y equidad suelen movilizar distintas creencias y experiencias profesionales. Por esta razón, no siempre existe una interpretación única frente a situaciones como esta.<br><br>Cuando una opinión genera desacuerdo, es común que aparezcan interpretaciones rápidas sobre las intenciones o conocimientos de la otra persona. Sin embargo, comprender una postura requiere ir más allá de la primera impresión e intentar identificar qué experiencias, preocupaciones o comprensiones de la justicia educativa podrían estar influyendo en ella.<br><br>Ampliar la comprensión de una situación no significa renunciar a las propias convicciones, sino desarrollar la capacidad de dialogar sobre temas complejos considerando distintas perspectivas.",
+            habilidades: [
+                { title: "Autoconocimiento", desc: "<strong>RESPUESTA:</strong> El autoconocimiento invita a reconocer cómo nuestras propias experiencias, creencias y conocimientos sobre inclusión educativa pueden influir en la manera en que interpretamos esta situación. Antes de evaluar la postura del colega, puede ser útil preguntarse qué emociones o ideas se activan en nosotros al escuchar opiniones diferentes sobre las adecuaciones." },
+                { title: "Autorregulación", desc: "<strong>RESPUESTA:</strong> La autorregulación puede ayudarnos a evitar respuestas impulsivas frente a comentarios con los que no estamos de acuerdo. Detenerse antes de reaccionar permite escuchar con mayor atención, analizar los argumentos presentes en la conversación y decidir conscientemente cómo participar en ella." },
+                { title: "Empatía", desc: "<strong>RESPUESTA:</strong> La empatía nos invita a comprender que las personas pueden interpretar una misma situación desde experiencias y conocimientos distintos. Intentar comprender las preocupaciones que expresa el colega no implica necesariamente compartir su postura, pero sí permite ampliar la comprensión de la situación y favorecer el diálogo." },
+                { title: "Resolución de conflictos", desc: "<strong>RESPUESTA:</strong> La resolución de conflictos puede ayudar a transformar un momento de discrepancia teórica o metodológica en una oportunidad de construcción comunitaria. Permite encauzar la conversación hacia la revisión conjunta de los marcos de equidad y los propósitos reales de los accesos inclusivos, previniendo fricciones internas." }
+            ]
+        }
+    ];
+
+    let currentCaseIndex = 0;
+    let selectedOptionIndex = null;
+
+    function startActivity() {
+        document.getElementById('screen-0').classList.remove('active');
+        document.getElementById('screen-case').classList.add('active');
+        loadCase(currentCaseIndex);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function loadCase(index) {
+        const data = casesData[index];
+        selectedOptionIndex = null;
+        
+        document.getElementById('case-badge').innerText = data.title;
+        document.getElementById('case-text').innerText = data.text;
+        
+        const imgElement = document.getElementById('case-image');
+        const loader = document.getElementById('image-loader');
+        imgElement.style.opacity = "0";
+        loader.style.display = "block";
+        imgElement.src = data.img;
+        imgElement.onload = function() {
+            loader.style.display = "none";
+            imgElement.style.opacity = "1";
+        };
+
+        const containerOpts1 = document.getElementById('options-1');
+        containerOpts1.innerHTML = '';
+        data.etapa1_opts.forEach((opt, idx) => {
+            containerOpts1.innerHTML += `
+                <div class="radio-option" id="opt1-${idx}" onclick="selectOption1(${idx})">
+                    <div class="radio-circle"></div>
+                    <div class="radio-text">${opt}</div>
+                </div>
+            `;
+        });
+
+        document.getElementById('btn-continuar').disabled = true;
+        document.getElementById('btn-continuar').style.display = 'block';
+        document.getElementById('info-alert-1').style.display = 'flex';
+        
+        const retroBox = document.getElementById('retro-box');
+        retroBox.style.display = 'none';
+        retroBox.innerHTML = '';
+
+        const etapa2Container = document.getElementById('etapa2-container');
+        etapa2Container.style.opacity = '0';
+        etapa2Container.style.pointerEvents = 'none';
+        etapa2Container.style.filter = 'blur(4px)';
+
+        renderEtapa2(data.habilidades);
+        document.getElementById('btn-next-case').style.display = 'none';
+    }
+
+    function selectOption1(index) {
+        soundClick.currentTime = 0; 
+        soundClick.play().catch(e=>{});
+
+        selectedOptionIndex = index;
+        const data = casesData[currentCaseIndex];
+        
+        data.etapa1_opts.forEach((_, idx) => {
+            const el = document.getElementById(`opt1-${idx}`);
+            if(idx === index) {
+                el.classList.add('selected');
+            } else {
+                el.classList.remove('selected');
+            }
+        });
+
+        document.getElementById('btn-continuar').disabled = false;
+    }
+
+    function submitEtapa1() {
+        soundSuccess.currentTime = 0; 
+        soundSuccess.play().catch(e=>{});
+
+        const data = casesData[currentCaseIndex];
+        
+        data.etapa1_opts.forEach((_, idx) => {
+            document.getElementById(`opt1-${idx}`).classList.add('disabled');
+        });
+
+        document.getElementById('btn-continuar').style.display = 'none';
+        document.getElementById('info-alert-1').style.display = 'none';
+
+        const retroBox = document.getElementById('retro-box');
+        retroBox.innerHTML = `<strong>💡 Análisis reflexivo:</strong><br><br>${data.retro}`;
+        retroBox.style.display = 'block';
+
+        const etapa2Container = document.getElementById('etapa2-container');
+        etapa2Container.style.opacity = '1';
+        etapa2Container.style.pointerEvents = 'auto';
+        etapa2Container.style.filter = 'none';
+    }
+
+    function renderEtapa2(habilidades) {
+        const containerOpts2 = document.getElementById('options-2');
+        containerOpts2.innerHTML = '';
+
+        habilidades.forEach((hab, idx) => {
+            containerOpts2.innerHTML += `
+                <div class="accordion-item">
+                    <div class="accordion-header" id="acc-header-${idx}" onclick="toggleAccordion(${idx})">
+                        <span>${hab.title}</span>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="accordion-content" id="acc-content-${idx}">
+                        ${hab.desc}
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function toggleAccordion(idx) {
+        soundClick.currentTime = 0; 
+        soundClick.play().catch(e=>{});
+
+        const header = document.getElementById(`acc-header-${idx}`);
+        const content = document.getElementById(`acc-content-${idx}`);
+        const isActive = header.classList.contains('active');
+
+        document.querySelectorAll('.accordion-header').forEach((h, i) => {
+            h.classList.remove('active');
+            document.getElementById(`acc-content-${i}`).style.display = 'none';
+        });
+
+        if (!isActive) {
+            header.classList.add('active');
+            content.style.display = 'block';
+        }
+
+        const nextBtn = document.getElementById('btn-next-case');
+        nextBtn.style.display = 'block';
+
+        if (currentCaseIndex === casesData.length - 1) {
+            nextBtn.innerText = "Ir al Cierre Final ➡️";
+        } else {
+            nextBtn.innerText = "Siguiente Situación ➡️";
+        }
+    }
+
+    function nextCase() {
+        if (currentCaseIndex < casesData.length - 1) {
+            currentCaseIndex++;
+            loadCase(currentCaseIndex);
+            
+            // ⬇️ SOLUCIÓN AL SCROLL ⬇️
+            // Hace que la ventana suba hasta el contenedor de la actividad para que la tarjeta 2 (o 3 o 4) se vea desde arriba
+            setTimeout(() => {
+                const caseScreen = document.getElementById('screen-case');
+                const offset = caseScreen.getBoundingClientRect().top + window.scrollY - 20;
+                window.scrollTo({ top: offset, behavior: 'smooth' });
+            }, 50);
+
+        } else {
+            document.getElementById('screen-case').classList.remove('active');
+            document.getElementById('screen-closure').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function finishActivity() {
+        document.getElementById('screen-closure').classList.remove('active');
+        document.getElementById('screen-end').classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function exitGenially() {
+        // ⬇️ SOLUCIÓN AL AVISO FEO NATIVO ⬇️
+        // En lugar de usar alert(), simplemente cambiamos el contenido de la pantalla para dar un mensaje bonito y elegante.
+        const endScreen = document.getElementById('screen-end');
+        endScreen.innerHTML = `
+            <span style="font-size: 5rem; display: block; margin-bottom: 1rem;">👋</span>
+            <h2 style="font-size: 2.8rem; margin-bottom: 10px; color: var(--accent-gold);">¡Hasta pronto!</h2>
+            <p style="font-size: 1.25rem; font-weight: 600; color: white;">Has finalizado la actividad.</p>
+            <p style="font-size: 1.1rem; font-weight: 400; color: #cbd5e1; margin-top: 15px;">Ya puedes cerrar esta pestaña y continuar con tu módulo en la plataforma.</p>
+            <p style="margin-top: 3rem; font-weight: 800; color: #94a3b8; font-size: 0.9rem;">UMCE-SENADIS 2026</p>
+        `;
+    }
+</script>
+</body>
+</html>
